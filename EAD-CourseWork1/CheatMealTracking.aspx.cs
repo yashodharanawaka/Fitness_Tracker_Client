@@ -1,18 +1,26 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
+using System.Net.Http;
+using System.Text;
+using System.Threading.Tasks;
 using System.Web.UI.WebControls;
 
 namespace EAD_CourseWork1
 {
     public partial class CheatMealTracking : System.Web.UI.Page
     {
+        private readonly HttpClient httpClient = new HttpClient();
+        private readonly string apiGatewayUrl = "https://localhost:7278/gateway";
         // List to store cheat meal tracking data
         public static List<CheatMealRecord> cheatMealList;
 
         // Define a class to represent cheat meal tracking data
         public class CheatMealRecord
         {
-            public string MealName { get; set; }
+    
+            public int userId { get; set; }
+            public string Name { get; set; }
             public int Calories { get; set; }
             public DateTime Date { get; set; }
         }
@@ -34,29 +42,97 @@ namespace EAD_CourseWork1
             }
         }
 
-        protected void btnAddMeal_Click(object sender, EventArgs e)
-        {
-            // Make the table visible when new data is added
-            cheatMealReportContainer.Visible = true;
 
-            // Retrieve meal name and calories inputs
-            string mealName = txtMealName.Text;
-            if (int.TryParse(txtCalories.Text, out int calories))
+        private async Task<bool> SaveCheatMealDataAsync(string mealName, int calories)
+        {
+            try
             {
-                // Create a new cheat meal data instance
-                CheatMealRecord cheatMealData = new CheatMealRecord
+                var cheatMealData = new CheatMealRecord
                 {
-                    MealName = mealName,
+                    userId = Sign_In.LoggedInUser.Id,
+                    Name = mealName,
                     Calories = calories,
                     Date = DateTime.Now
                 };
 
-                // Add the cheat meal data to the list
-                cheatMealList.Add(cheatMealData);
+                // Serialize the cheat meal data object to JSON
+                var cheatMealDataJson = JsonConvert.SerializeObject(cheatMealData);
 
-                // Clear the inputs
-                txtMealName.Text = string.Empty;
-                txtCalories.Text = string.Empty;
+                // Create a StringContent with the JSON data
+                var content = new StringContent(cheatMealDataJson, Encoding.UTF8, "application/json");
+
+                // Make a POST request to the cheat meal tracking service through the API gateway
+                var response = await httpClient.PostAsync($"{apiGatewayUrl}/cheatmeal", content);
+                response.EnsureSuccessStatusCode();
+
+                return true; // Successfully saved cheat meal data
+            }
+            catch (Exception ex)
+            {
+                // Handle exceptions (e.g., log or display error message)
+                // ...
+
+                return false; // Failed to save cheat meal data
+            }
+        }
+
+        private async Task GenerateCheatMealReportAsync()
+        {
+            try
+            {
+                // Make a GET request to the cheat meal tracking service through the API gateway
+                var response = await httpClient.GetAsync($"{apiGatewayUrl}/cheatmeal/{Sign_In.LoggedInUser.Id}");
+                response.EnsureSuccessStatusCode();
+                var responseBody = await response.Content.ReadAsStringAsync();
+                // Deserialize the JSON response to a list of CheatMealRecord objects
+                List<CheatMealRecord> cheatMealDataList = JsonConvert.DeserializeObject<List<CheatMealRecord>>(responseBody);
+
+                // Create a table to display the cheat meals
+                Table cheatMealTable = new Table
+                {
+                    CssClass = "table table-bordered table-striped cheat-meal-table"
+                };
+
+                // ... Code to create the table headers and rows as before ...
+
+                // Clear the previous report
+                cheatMealReportContainer.Controls.Clear();
+
+                // Add the table to the page
+                cheatMealReportContainer.Controls.Add(cheatMealTable);
+
+                // Make the table visible
+                cheatMealReportContainer.Visible = true;
+            }
+            catch (Exception ex)
+            {
+                // Handle exceptions (e.g., log or display error message)
+            }
+        }
+
+        protected async void btnAddMeal_Click(object sender, EventArgs e)
+        {
+            // Retrieve meal name and calories inputs
+            string mealName = txtMealName.Text;
+            if (int.TryParse(txtCalories.Text, out int calories))
+            {
+                // Call the SaveCheatMealDataAsync method to save the cheat meal data
+                var isSaved = await SaveCheatMealDataAsync(mealName, calories);
+
+                if (isSaved)
+                {
+                    // Clear the inputs
+                    txtMealName.Text = string.Empty;
+                    txtCalories.Text = string.Empty;
+
+                    // Refresh the cheat meal report
+                    await GenerateCheatMealReportAsync();
+                }
+                else
+                {
+                    lblMessage.Text = "Failed to save cheat meal data. Please try again.";
+                    lblMessage.Visible = true;
+                }
             }
             else
             {
@@ -100,7 +176,7 @@ namespace EAD_CourseWork1
                 TableRow row = new TableRow();
                 TableCell cellMealName = new TableCell
                 {
-                    Text = cheatMeal.MealName
+                    Text = cheatMeal.Name
                 };
                 TableCell cellMealQuantity = new TableCell
                 {

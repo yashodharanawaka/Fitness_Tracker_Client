@@ -9,7 +9,8 @@ namespace EAD_CourseWork1
         {
             if (!IsPostBack)
             {
-                if (!Sign_In.IsAuthenticated)
+                bool isAuthenticated = Sign_In.IsAuthenticated;
+                if (!isAuthenticated)
                 {
                     // Store the current page URL in the session
                     Sign_In.RedirectUrl = Request.UrlReferrer?.ToString();
@@ -19,11 +20,5 @@ namespace EAD_CourseWork1
                 }
             }
         }
-
-        protected void btnTrackWeight_Click(object sender, EventArgs e)
-        {
-            Response.Redirect("~/WorkoutTracking.aspx");
-        }
-
     }
 }

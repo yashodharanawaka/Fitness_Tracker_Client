@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<IntensityTypes>
+	<Intensity>
+		<Id>1</Id>
+		<Name>Low</Name>
+	</Intensity>
+	<Intensity>
+		<Id>2</Id>
+		<Name>Medium</Name>
+	</Intensity>
+	<Intensity>
+		<Id>3</Id>
+		<Name>High</Name>
+	</Intensity>
+</IntensityTypes>

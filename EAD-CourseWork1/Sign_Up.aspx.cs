@@ -10,7 +10,7 @@ namespace EAD_CourseWork1
     public partial class Sign_Up : System.Web.UI.Page
     {
         private readonly HttpClient httpClient = new HttpClient();
-        private readonly string apiGatewayUrl = "https://localhost:7278";
+        private readonly string apiGatewayUrl = "https://localhost:7278/gateway";
 
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -31,6 +31,7 @@ namespace EAD_CourseWork1
 
         public class UserData
         {
+            public int Id { get; set; }
             public string Name { get; set; }
             public int Age { get; set; }
             public string Gender { get; set; }
@@ -52,7 +53,7 @@ namespace EAD_CourseWork1
             double weight = Convert.ToDouble(txtWeight.Text);
 
             // Check if the username is already taken
-            string endpointUrl = $"{apiGatewayUrl}/gateway/User";
+            string endpointUrl = $"{apiGatewayUrl}/user";
 
             try
             {
@@ -120,7 +121,7 @@ namespace EAD_CourseWork1
             // Add the new user to the list
             try
             {
-                string endpointUrl = $"{apiGatewayUrl}/user-microservice/api/User";
+                string endpointUrl = $"{apiGatewayUrl}/user";
 
                 // Serialize the User object to JSON
                 string jsonUser = JsonConvert.SerializeObject(newUser);
@@ -139,15 +140,17 @@ namespace EAD_CourseWork1
                 else
                 {
                     // Handle error response
-                    string errorMessage = $"Failed to add user: {response.StatusCode} - {response.ReasonPhrase}";
-                    ClientScript.RegisterStartupScript(this.GetType(), "errorPopup", $"showErrorPopup('{errorMessage}');", true);
+                    // Display an error message if authentication fails
+                    lblMessage.Text = "Error occured while signing up.";
+                    lblMessage.Visible = true;
                 }
             }
             catch (Exception ex)
             {
                 // Handle exception
-                string errorMessage = $"An error occurred: {ex.Message}";
-                ClientScript.RegisterStartupScript(this.GetType(), "errorPopup", $"showErrorPopup('{errorMessage}');", true);
+                // Display an error message if authentication fails
+                lblMessage.Text = "Error occured while signing up.";
+                lblMessage.Visible = true;
             }
         }
     }

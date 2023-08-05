@@ -12,7 +12,7 @@
         <%: Scripts.Render("~/bundles/modernizr") %>
     </asp:PlaceHolder>
 
-    <webopt:bundlereference runat="server" path="~/Content/css" />
+    <webopt:BundleReference runat="server" Path="~/Content/css" />
     <link href="favicon.ico" rel="shortcut icon" type="image/x-icon" />
 
 </head>
@@ -58,8 +58,9 @@
             </asp:ContentPlaceHolder>
             <hr />
             <footer>
-                <p>&copy; <%: DateTime.Now.Year %> - Fitness Tracker</p>
+                <asp:Label ID="lblFooter" runat="server"></asp:Label>
             </footer>
+
         </div>
     </form>
     <asp:PlaceHolder runat="server">

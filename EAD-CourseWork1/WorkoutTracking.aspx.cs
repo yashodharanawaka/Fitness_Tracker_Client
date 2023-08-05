@@ -20,11 +20,12 @@ namespace EAD_CourseWork1
         // class to represent workout tracking data
         public class WorkoutRecord
         {
+            public int Id { get; set; }
             public int UserId { get; set; }
             public string Exercise { get; set; }
             public int Duration { get; set; }
             public string Intensity { get; set; }
-            public DateTime date { get; set; }
+            public DateTime Date { get; set; }
         }
 
         public class Exercise
@@ -80,34 +81,36 @@ namespace EAD_CourseWork1
                 var content = new StringContent(workoutDataJson, Encoding.UTF8, "application/json");
 
                 // Make a POST request to the workout tracking service through the API gateway
-                var response = await httpClient.PostAsync($"{apiGatewayUrl}/workout/add", content);
+                var response = await httpClient.PostAsync($"{apiGatewayUrl}/workout", content);
                 response.EnsureSuccessStatusCode();
 
                 return true; // Successfully saved workout data
             }
             catch (Exception ex)
             {
-                // Handle exceptions (e.g., log or display error message)
-                // ...
-
                 return false; // Failed to save workout data
             }
         }
 
         protected async void btnAddWorkout_Click(object sender, EventArgs e)
         {
-            string exercise = ddlExercise.SelectedValue;
+            // Clear previous error messages
+            lblMessage.Text = string.Empty;
+            lblMessage.Visible = false;
+
+            string exercise = ddlExercise.SelectedItem.Text;
             if (int.TryParse(txtDuration.Text, out int duration))
             {
-                string intensity = ddlIntensity.SelectedValue;
+                string intensity = ddlIntensity.SelectedItem.Text;
 
                 // Creating a new workout data instance
                 WorkoutRecord workoutData = new WorkoutRecord
                 {
+                    UserId = Sign_In.LoggedInUser.Id,
                     Exercise = exercise,
                     Duration = duration,
                     Intensity = intensity,
-                    date = DateTime.Now
+                    Date = DateTime.Now.Date
                 };
 
                 // Call the API to save the workout data
@@ -137,9 +140,9 @@ namespace EAD_CourseWork1
         }
 
 
+
         protected async void btnGenerateReport_Click(object sender, EventArgs e)
         {
-            // Assuming you have stored the user ID after successful login
             int userId = Sign_In.LoggedInUser.Id;
 
             // Make the HTTP GET request with the user ID
@@ -172,10 +175,7 @@ namespace EAD_CourseWork1
             }
             catch (Exception ex)
             {
-                // Handle exceptions (e.g., log or display error message)
-                // ...
-
-                return new List<WorkoutRecord>(); // Return an empty list in case of an error
+                return new List<WorkoutRecord>();
             }
         }
 

@@ -8,9 +8,11 @@ namespace EAD_CourseWork1
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-
+            if (!IsPostBack)
+            {
+                int currentYear = DateTime.Now.Year;
+                lblFooter.Text = $"&copy; {currentYear} - Fitness Tracker";
+            }
         }
-
-
     }
 }

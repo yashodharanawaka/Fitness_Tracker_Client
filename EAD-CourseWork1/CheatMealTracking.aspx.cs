@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web.Script.Serialization;
 using System.Web.UI.WebControls;
 
 namespace EAD_CourseWork1
@@ -141,9 +142,9 @@ namespace EAD_CourseWork1
             }
         }
 
-        protected void btnGenerateReport_Click(object sender, EventArgs e)
+        protected async void btnGenerateReport_Click(object sender, EventArgs e)
         {
-            List<CheatMealRecord> cheatMealsForDay = cheatMealList.FindAll(meal => meal.Date.Date == DateTime.Now.Date);
+            List<CheatMealRecord> cheatMealsForDay = await GetTodayCheatMeals(Sign_In.LoggedInUser.Id);
 
             // Create a table to display the cheat meals
             Table cheatMealTable = new Table
@@ -200,6 +201,26 @@ namespace EAD_CourseWork1
 
             // Make the table visible
             cheatMealReportContainer.Visible = true;
+        }
+
+        private async Task<List<CheatMealRecord>> GetTodayCheatMeals(int userId)
+        {
+            try
+            {
+                var response = await httpClient.GetAsync($"{apiGatewayUrl}/cheatmeal/report?userId={userId}");
+                response.EnsureSuccessStatusCode();
+
+                string responseContent = await response.Content.ReadAsStringAsync();
+
+                JavaScriptSerializer serializer = new JavaScriptSerializer();
+                var todayCheatMeals = serializer.Deserialize<List<CheatMealRecord>>(responseContent);
+
+                return todayCheatMeals;
+            }
+            catch (Exception ex)
+            {
+                return new List<CheatMealRecord>();
+            }
         }
     }
 }

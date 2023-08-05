@@ -53,7 +53,7 @@
     </div>
         <script type="text/javascript">
         function showErrorPopup(message) {
-            alert(message); // You can replace this with a custom modal dialog if you prefer
+            alert(message);
         }
         </script>
 </asp:Content>

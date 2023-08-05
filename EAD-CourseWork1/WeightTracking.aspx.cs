@@ -44,9 +44,16 @@ namespace EAD_CourseWork1
 
         private async Task LoadWeightData()
         {
-            // Call the asynchronous method to predict the next weight
-            double nextWeight = await PredictNextWeightAsync();
-            lblWeightPrediction.Text = nextWeight.ToString("F2");
+            double? nextWeight = await PredictNextWeightAsync();
+            if (nextWeight.HasValue)
+            {
+                lblWeightPrediction.Text = nextWeight.Value.ToString("F2");
+            }
+            else
+            {
+                // next weight prediction is not available
+                lblWeightPrediction.Text = "Next weight prediction is not avaiblable.";
+            }
         }
 
         protected async void Page_PreRender(object sender, EventArgs e)
@@ -97,8 +104,16 @@ namespace EAD_CourseWork1
                 if (isSaved)
                 {
                     // Update the weight prediction label after saving the new weight
-                    double nextWeight = await PredictNextWeightAsync();
-                    lblWeightPrediction.Text = nextWeight.ToString("F2");
+                    double? nextWeight = await PredictNextWeightAsync();
+                    if (nextWeight.HasValue)
+                    {
+                        lblWeightPrediction.Text = nextWeight.Value.ToString("F2");
+                    }
+                    else
+                    {
+                        // next weight prediction is not available
+                        lblWeightPrediction.Text = "Next weight prediction is not avaiblable.";
+                    }
                 }
                 else
                 {
@@ -153,7 +168,11 @@ namespace EAD_CourseWork1
                 // Parse the response body to a double
                 if (double.TryParse(responseBody, out double nextWeight))
                 {
-                    return nextWeight;
+                    // Check if the next weight is negative (-1)
+                    if (nextWeight >= 0)
+                    {
+                        return nextWeight;
+                    }
                 }
             }
 
